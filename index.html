@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Escape del Aula Imposible · La Copa del Aula</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --paper:#FAF7F2; --ink:#0B0B0B; --terra:#C8553D; --pine:#234B3D; --muted:#6f6a62; --line:rgba(11,11,11,.14); --ok:#234B3D; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:'Inter',system-ui,sans-serif; background:var(--paper); color:var(--ink); line-height:1.5; }
+  .wrap{ max-width:780px; margin:0 auto; padding:30px 20px 70px; }
+  .kick{ font-family:'Inter'; font-weight:700; font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:var(--terra); }
+  h1{ font-family:'Fraunces'; font-weight:900; font-size:2.1em; line-height:1.03; margin:.1em 0 .1em; }
+  .intro{ font-size:1.0em; color:#2a2722; max-width:34em; }
+
+  .bar{ position:sticky; top:0; z-index:5; background:var(--paper); padding:12px 0 10px; margin-top:14px; border-bottom:1px solid var(--line); }
+  .bar .line{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .pips{ display:flex; gap:6px; flex-wrap:wrap; }
+  .pip{ width:22px; height:22px; border-radius:50%; border:2px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--muted); font-weight:700; }
+  .pip.on{ background:var(--ok); border-color:var(--ok); color:#fff; }
+  .barlab{ font-weight:700; font-size:.88em; color:var(--muted); } .barlab b{ color:var(--ok); }
+  .banco{ display:flex; gap:5px; margin-top:9px; flex-wrap:wrap; }
+  .slot{ width:30px; height:36px; border:1.5px solid var(--line); border-radius:7px; display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces'; font-weight:900; font-size:1.1em; color:var(--muted); background:#fff; }
+  .slot.filled{ color:var(--terra); border-color:var(--terra); }
+
+  .lock{ border:1.5px solid var(--line); border-radius:16px; padding:20px 22px; background:#fff; margin-top:16px; }
+  .lock.solved{ border-color:var(--ok); background:rgba(35,75,61,.05); }
+  .top{ display:flex; align-items:center; gap:12px; }
+  .no{ font-family:'Fraunces'; font-weight:900; font-size:1.4em; color:var(--terra); line-height:1; }
+  .lock.solved .no{ color:var(--ok); }
+  .name{ font-family:'Inter'; font-weight:700; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+  .piece{ margin-left:auto; width:30px; height:30px; border-radius:8px; border:1.5px dashed var(--line); display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces'; font-weight:900; color:var(--muted); font-size:1.05em; }
+  .lock.solved .piece{ border-style:solid; border-color:var(--ok); color:var(--ok); }
+  .lock h3{ font-family:'Fraunces'; font-weight:600; font-size:1.22em; margin:.35em 0 .12em; }
+  .q{ font-size:1em; margin:.1em 0 .5em; color:#2a2722; }
+  .opts{ list-style:none; padding:0; margin:0 0 12px; } .opts li{ margin:5px 0; font-size:.96em; } .opts b{ color:var(--terra); }
+  .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  input[type=text]{ flex:1 1 200px; min-width:0; font-family:'Inter'; font-size:1em; padding:11px 14px; border:1.5px solid var(--line); border-radius:10px; background:var(--paper); }
+  input[type=text]:focus{ outline:none; border-color:var(--terra); }
+  button.try{ font-family:'Inter'; font-weight:700; font-size:.95em; padding:11px 20px; border:none; border-radius:10px; background:var(--terra); color:#fff; cursor:pointer; }
+  button.try:hover{ background:#b34a35; }
+  .fb{ margin-top:10px; font-size:.9em; min-height:1.1em; } .fb.bad{ color:var(--terra); }
+  .lock.solved .row{ display:none; }
+  .done-msg{ display:none; color:var(--ok); font-weight:600; margin-top:6px; font-size:.95em; }
+  .lock.solved .done-msg{ display:block; }
+
+  .final{ border:2px solid var(--ink); border-radius:18px; padding:24px 24px; background:#fff; margin-top:26px; opacity:.5; }
+  .final.ready{ opacity:1; border-color:var(--terra); }
+  .final h2{ font-family:'Fraunces'; font-weight:900; font-size:1.5em; margin:.1em 0 .2em; }
+  .final .lockedmsg{ color:var(--muted); font-style:italic; }
+  .final .form{ display:none; } .final.ready .form{ display:block; } .final.ready .lockedmsg{ display:none; }
+
+  .win{ display:none; margin-top:22px; border:2px solid var(--ok); border-radius:18px; padding:28px 26px; background:rgba(35,75,61,.07); text-align:center; }
+  .win.show{ display:block; }
+  .win h2{ font-family:'Fraunces'; font-weight:900; font-size:1.9em; margin:.1em 0; color:var(--ok); }
+  .win .code{ font-family:'Fraunces'; font-weight:900; font-size:2em; letter-spacing:.06em; color:var(--terra); margin:.15em 0; }
+  .reset{ display:block; margin:26px auto 0; font-family:'Inter'; font-weight:700; font-size:.85em; color:var(--muted); background:none; border:none; cursor:pointer; text-decoration:underline; }
+  .foot{ margin-top:28px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-weight:600; text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kick">La Copa del Aula · Día 2 · Sesión 3</div>
+  <h1>El Escape del Aula Imposible</h1>
+  <p class="intro">Diez candados de diseño los tienen atrapados. Cada uno que abran suelta una <b>pieza</b>. Junten las diez en orden para armar el <b>código de salida</b>. Piensen en equipo, el escriba teclea, roten en cada candado. Cuidado: algunos traen trampa.</p>
+
+  <div class="bar">
+    <div class="line">
+      <div class="pips" id="pips"></div>
+      <div class="barlab"><b id="cnt">0</b> de 10 candados</div>
+    </div>
+    <div class="banco" id="banco"></div>
+  </div>
+
+  <!-- 1 -->
+  <div class="lock" data-i="0">
+    <div class="top"><div class="no">1</div><div class="name">El disfraz lector</div><div class="piece" id="pz0">?</div></div>
+    <h3>¿Contenido o habilidad?</h3>
+    <p class="q">La meta: <b>leer en voz alta con fluidez</b>. ¿Estándar de contenido o de habilidad?</p>
+    <div class="row"><input type="text" placeholder="contenido / habilidad" autocomplete="off"><button class="try">Abrir</button></div>
+    <div class="fb"></div>
+    <div class="done-msg">✓ Habilidad. La fluidez es la destreza meta: leer en voz alta ES el muro, no un disfraz.</div>
+  </div>
+
+  <!-- 2 -->
+  <div class="lock" data-i="1">
+    <div class="top"><div class="no">2</div><div class="name">El disfraz científico</div><div class="piece" id="pz1">?</div></div>
+    <h3>¿Contenido o habilidad?</h3>
+    <p class="q">La meta: <b>explicar con tus palabras el ciclo del agua</b>. ¿Contenido o habilidad?</p>
+    <div class="row"><input type="text" placeholder="contenido / habilidad" autocomplete="off"><button class="try">Abrir</button></div>
+    <div class="fb"></div>
+    <div class="done-msg">✓ Contenido. La meta es conocer el ciclo; "explicar con tus palabras" es solo la puerta.</div>
+  </div>
+
+  <!-- 3 -->
+  <div class="lock" data-i="2">
+    <div class="top"><div class="no">3</div><div class="name">La salida tapada</div><div class="piece" id="pz2">?</div></div>
+    <h3>¿Qué puerta faltó?</h3>
+    <p class="q">Diego domina el tema, pero la única forma de entregar era por escrito, y él se traba al escribir. ¿Qué puerta le faltó? <b>Enganche</b>, <b>Entender</b> o <b>Mostrar</b>.</p>
+    <div class="row"><input type="text" placeholder="una de las tres" autocomplete="off"><button class="try">Abrir</button></div>
+    <div class="fb"></div>
+    <div class="done-msg">✓ Mostrar (acción y expresión). Sabía el contenido; le faltó una salida distinta a la escrita.</div>
+  </div>
+
+  <!-- 4 -->
+  <div class="lock" data-i="3">
+    <div class="top"><div class="no">4</div><div class="name">La instrucción fugaz</div><div class="piece" id="pz3">?</div></div>
+    <h3>¿Qué puerta faltó?</h3>
+    <p class="q">La indicación se dio una sola vez, hablada y rápida. Varios no supieron ni empezar. ¿Qué puerta faltó? <b>Enganche</b>, <b>Entender</b> o <b>Mostrar</b>.</p>
+    <div class="row"><input type="text" placeholder="una de las tres" autocomplete="off"><button class="try">Abrir</button></div>
+    <div class="fb"></div>
+    <div class="done-msg">✓ Entender (representación). La información llegó por un solo canal, sin apoyo visual ni repetición.</div>
+  </div>
+
+  <!-- 5 -->
+  <div class="lock" data-i="4">
+    <div class="top"><div class="no">5</div><div class="name">El rediseño correcto</div><div class="piece" id="pz4">?</div></div>
+    <h3>Abre sin mover el muro</h3>
+    <p class="q">La meta es <b>escribir un ensayo argumentativo</b> (habilidad). ¿Cuál rediseño abre una puerta SIN mover el muro? Escribe la letra.</p>
+    <ul class="opts">
+      <li><b>a)</b> Aceptar un video en lugar del ensayo.</li>
+      <li><b>b)</b> Dar una plantilla de estructura y 10 minutos extra.</li>
+      <li><b>c)</b> Pedir solo un párrafo en vez de ensayo.</li>
+    </ul>
+    <div class="row"><input type="text" placeholder="a, b o c" autocomplete="off"><button class="try">Abrir</button></div>
+    <div class="fb"></div>
+    <div class="done-msg">✓ b. La plantilla y el tiempo son andamios: mismo muro (escribir), más apoyo. (a) quita el escribir; (c) lo baja.</div>
+  </div>
+
+  <!-- 6 -->
+  <div class="lock" data-i="5">
+    <div class="top"><div class="no">6</div><div class="name">El que cierra puertas</div><div class="piece" id="pz5">?</div></div>
+    <h3>Encuentra al intruso</h3>
+    <p class="q">La meta es <b>conocer las fases de la Luna</b> (contenido). ¿Cuál de estas NO abre una puerta, va contra el DUA? Escribe la letra.</p>
+    <ul class="opts">
+      <li><b>a)</b> Mostrarlo en una maqueta.</li>
+      <li><b>b)</b> Explicarlo en un audio.</li>
+      <li><b>c)</b> Exigir la definición idéntica al libro, de memoria.</li>
+    </ul>
+    <div class="row"><input type="text" placeholder="a, b o c" autocomplete="off"><button class="try">Abrir</button></div>
+    <div class="fb"></div>
+    <div class="done-msg">✓ c. Exigir una sola forma "correcta" cierra puertas. Maqueta y audio son caminos válidos al mismo contenido.</div>
+  </div>
+
+  <!-- 7 -->
+  <div class="lock" data-i="6">
+    <div class="top"><div class="no">7</div><div class="name">La medición fantasma</div><div class="piece" id="pz6">?</div></div>
+    <h3>Lo que mides sin querer</h3>
+    <p class="q">Un examen de historia, a mano y cronometrado. Además del contenido histórico, ¿qué habilidad estás midiendo sin querer? Escribe la letra.</p>
+    <ul class="opts">
+      <li><b>a)</b> La creatividad.</li>
+      <li><b>b)</b> La velocidad para escribir a mano.</li>
+      <li><b>c)</b> El interés por la materia.</li>
+    </ul>
+    <div class="row"><input type="text" placeholder="a, b o c" autocomplete="off"><button class="try">Abrir</button></div>
+    <div class="fb"></div>
+    <div class="done-msg">✓ b. El reloj y la mano meten una habilidad extra que no querías calificar: escribir rápido.</div>
+  </div>
+
+  <!-- 8 -->
+  <div class="lock" data-i="7">
+    <div class="top"><div class="no">8</div><div class="name">El muro movido</div><div class="piece" id="pz7">?</div></div>
+    <h3>¿Mueve el muro o abre una puerta?</h3>
+    <p class="q">La meta es que <b>hablen francés</b> (habilidad). Alguien propone dejar que "entreguen un ensayo escrito en francés" en vez de hablar. ¿Eso <b>mueve el muro</b> (escribe M) o <b>abre una puerta</b> (escribe P)?</p>
+    <div class="row"><input type="text" placeholder="M o P" autocomplete="off"><button class="try">Abrir</button></div>
+    <div class="fb"></div>
+    <div class="done-msg">✓ M. Cambiar hablar por escribir mueve el muro: pierdes justo la habilidad que querías medir.</div>
+  </div>
+
+  <!-- 9 -->
+  <div class="lock" data-i="8">
+    <div class="top"><div class="no">9</div><div class="name">El disfraz conversador</div><div class="piece" id="pz8">?</div></div>
+    <h3>¿Contenido o habilidad?</h3>
+    <p class="q">La meta: <b>sostener una conversación básica en inglés</b>. ¿Contenido o habilidad?</p>
+    <div class="row"><input type="text" placeholder="contenido / habilidad" autocomplete="off"><button class="try">Abrir</button></div>
+    <div class="fb"></div>
+    <div class="done-msg">✓ Habilidad. Conversar es saber hacer: la habilidad es el muro.</div>
+  </div>
+
+  <!-- 10 -->
+  <div class="lock" data-i="9">
+    <div class="top"><div class="no">10</div><div class="name">La llave maestra</div><div class="piece" id="pz9">?</div></div>
+    <h3>La regla del día</h3>
+    <p class="q">Si el estándar es de <b>contenido</b>, el formato es una ______. Complétalo en una palabra.</p>
+    <div class="row"><input type="text" placeholder="una palabra" autocomplete="off"><button class="try">Abrir</button></div>
+    <div class="fb"></div>
+    <div class="done-msg">✓ Puerta. Si es contenido, el formato siempre es puerta: ábrela.</div>
+  </div>
+
+  <!-- FINAL -->
+  <div class="final" id="final">
+    <div class="kick">La salida</div>
+    <h2>El código de salida</h2>
+    <p class="lockedmsg">Abre los diez candados para desbloquear la salida. Te faltan piezas.</p>
+    <div class="form">
+      <p class="q">Junta las diez piezas en orden y escribe el código. Pista: es la idea central del día, en dos palabras.</p>
+      <div class="row"><input type="text" id="finalinput" placeholder="el código de salida" autocomplete="off"><button class="try" id="finaltry">Escapar</button></div>
+      <div class="fb" id="finalfb"></div>
+    </div>
+  </div>
+
+  <div class="win" id="win">
+    <div class="kick" style="color:var(--ok)">¡Escaparon!</div>
+    <h2>Cancha despejada.</h2>
+    <p>Armaron el código: mismo muro, MÁS PUERTAS. Muéstrale esta pantalla al facilitador para registrar su gol.</p>
+    <div class="code">MÁS PUERTAS</div>
+    <p class="intro" style="margin:0 auto">Ya piensan como diseñadores: nombran el muro y abren puertas. Lo demás del día es practicarlo.</p>
+  </div>
+
+  <button class="reset" id="reset">Reiniciar los candados</button>
+  <div class="foot">El Aula Imposible · ARJI · 2026</div>
+</div>
+
+<script>
+  function norm(s){ return (s||'').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+  var answers=[
+    ['habilidad','h'],
+    ['contenido','c'],
+    ['mostrar','accion','accion y expresion'],
+    ['entender','representacion'],
+    ['b'],
+    ['c'],
+    ['b'],
+    ['m','muro','mueve el muro'],
+    ['habilidad','h'],
+    ['puerta','p']
+  ];
+  var letters=['M','A','S','P','U','E','R','T','A','S'];
+  var hints=[
+    '¿Conocer algo o saber hacer algo? La fluidez es una destreza que se entrena.',
+    '¿Cuál es la meta real: el ciclo del agua, o el acto de explicar? El verbo engaña.',
+    'Sabía el tema. El problema fue la ÚNICA forma de entregarlo.',
+    'No es que no le importara: no pudo procesar una instrucción única y veloz.',
+    'Una opción quita el escribir; otra lo baja; solo una lo mantiene y ayuda.',
+    'Dos son caminos distintos al mismo saber. Una exige un solo camino.',
+    'El reloj y la letra a mano meten una destreza que no querías calificar.',
+    'Si la meta es HABLAR y aceptas ESCRIBIR, ¿sigues midiendo lo mismo?',
+    'Conversar es algo que se hace, no un dato que se sabe.',
+    'El muro no se mueve, pero abres más… ¿qué?'
+  ];
+  var solved=new Array(10).fill(false);
+  var locks=document.querySelectorAll('.lock');
+  var pipsEl=document.getElementById('pips'), bancoEl=document.getElementById('banco'), cntEl=document.getElementById('cnt');
+  var finalEl=document.getElementById('final'), winEl=document.getElementById('win');
+
+  for(var i=0;i<10;i++){
+    var p=document.createElement('div'); p.className='pip'; p.textContent=(i+1); p.id='pip'+i; pipsEl.appendChild(p);
+    var sl=document.createElement('div'); sl.className='slot'; sl.textContent='·'; sl.id='slot'+i; bancoEl.appendChild(sl);
+  }
+
+  function refresh(){
+    var n=0; for(var i=0;i<10;i++){ if(solved[i]) n++; }
+    cntEl.textContent=n;
+    for(var i=0;i<10;i++){
+      document.getElementById('pip'+i).classList.toggle('on', solved[i]);
+      var sl=document.getElementById('slot'+i), pz=document.getElementById('pz'+i);
+      if(solved[i]){ sl.textContent=letters[i]; sl.classList.add('filled'); pz.textContent=letters[i]; }
+      else { sl.textContent='·'; sl.classList.remove('filled'); pz.textContent='?'; }
+    }
+    finalEl.classList.toggle('ready', n===10);
+  }
+
+  locks.forEach(function(lock){
+    var i=+lock.dataset.i;
+    var input=lock.querySelector('input'), btn=lock.querySelector('.try'), fb=lock.querySelector('.fb');
+    function tryIt(){
+      if(solved[i]) return;
+      var v=norm(input.value);
+      if(!v){ fb.className='fb bad'; fb.textContent='Escriban su respuesta primero.'; return; }
+      if(answers[i].indexOf(v)>-1){ solved[i]=true; lock.classList.add('solved'); fb.textContent=''; refresh(); }
+      else { fb.className='fb bad'; fb.textContent='Ese no abre. Pista: '+hints[i]; }
+    }
+    btn.addEventListener('click', tryIt);
+    input.addEventListener('keydown', function(e){ if(e.key==='Enter') tryIt(); });
+  });
+
+  var finalInput=document.getElementById('finalinput'), finalTry=document.getElementById('finaltry'), finalFb=document.getElementById('finalfb');
+  function tryFinal(){
+    var n=0; for(var i=0;i<10;i++){ if(solved[i]) n++; }
+    if(n<10){ return; }
+    var v=norm(finalInput.value).replace(/\s+/g,'');
+    if(v==='maspuertas'){
+      finalFb.textContent=''; winEl.classList.add('show'); winEl.scrollIntoView({behavior:'smooth', block:'center'});
+    } else {
+      finalFb.className='fb bad'; finalFb.textContent='Aún no. Lee las diez piezas en orden: M-A-S-P-U-E-R-T-A-S.';
+    }
+  }
+  finalTry.addEventListener('click', tryFinal);
+  finalInput.addEventListener('keydown', function(e){ if(e.key==='Enter') tryFinal(); });
+
+  document.getElementById('reset').addEventListener('click', function(){
+    solved=new Array(10).fill(false);
+    locks.forEach(function(l){ l.classList.remove('solved'); l.querySelector('input').value=''; l.querySelector('.fb').textContent=''; });
+    finalInput.value=''; finalFb.textContent=''; winEl.classList.remove('show'); refresh();
+  });
+
+  refresh();
+</script>
+</body>
+</html>
